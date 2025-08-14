@@ -1178,6 +1178,9 @@ func (c *Controller) handleErrorNoLock(err error) error {
 					// users and callers unexpectedly.
 					// We reject the request, so do not set the replica to ERR if the snapshot is already existing.
 					snapshotExistList[address] = struct{}{}
+				} else if strings.Contains(replicaErr.Error(), types.ErrorStringNoSpaceLeftOnDevice) {
+					logrus.WithError(err).Errorf("Disk is out of space for replica %s", address)
+					return types.ErrNoSpaceLeftOnDevice
 				} else {
 					logrus.WithError(err).Errorf("Setting replica %s to ERR", address)
 					c.setReplicaModeNoLock(address, types.ERR)
